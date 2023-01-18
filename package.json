@@ -1,0 +1,91 @@
+{
+  "name": "nemglo_app",
+  "productName": "NEMGLO Desktop App",
+  "version": "0.1.0",
+  "description": "NEM Green-energy Load Optimisation App",
+  "private": true,
+  "main": "public/electron.js",
+  "dependencies": {
+    "@amcharts/amcharts5": "^5.2.46",
+    "@babel/runtime": "^7.20.7",
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
+    "@mui/icons-material": "^5.11.0",
+    "@mui/material": "^5.11.3",
+    "@mui/styled-engine-sc": "^5.11.0",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^14.4.3",
+    "antd": "^5.1.2",
+    "axios": "^1.2.2",
+    "bootstrap": "^5.2.3",
+    "cross-env": "^7.0.3",
+    "electron-is-dev": "^2.0.0",
+    "moment": "^2.29.4",
+    "plotly.js": "^2.17.0",
+    "react": "^18.2.0",
+    "react-bootstrap": "^2.7.0",
+    "react-bootstrap-datetimepicker": "^0.0.22",
+    "react-bootstrap-range-slider": "^3.0.8",
+    "react-bootstrap-sidebar-menu": "^2.0.3",
+    "react-bootstrap-switch": "^15.5.3",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.7.1",
+    "react-loader-spinner": "^5.3.4",
+    "react-modern-drawer": "^1.1.2",
+    "react-plotly.js": "^2.6.0",
+    "react-pro-sidebar": "^1.0.0-alpha.9",
+    "react-router-dom": "^6.6.1",
+    "react-scripts": "^5.0.1",
+    "recharts": "^2.2.0",
+    "styled-components": "^5.3.6",
+    "web-vitals": "^3.1.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "watch": "webpack --config webpack.common.js --watch",
+    "backend-start": "python backend/app.py",
+    "electron-dev": "concurrently \"cross-env BROWSER=none npm start\" \"wait-on http://localhost:3000 && electron .\" \"npm run backend-start\"",
+    "electron-pack": "electron-builder -c.extraMetadata.main=build/electron.js",
+    "preelectron-pack": "react-scripts build"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "build": {
+    "appId": "a",
+    "win": {
+      "target": "portable"
+    },
+    "portable": {
+      "unicode": false,
+      "artifactName": "nemglo_desktop_app.exe"
+    }
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0",
+    "electron": "^22.0.0",
+    "electron-builder": "^23.6.0",
+    "python-shell": "^3.0.1",
+    "wait-on": "^7.0.1",
+    "webpack-cli": "^5.0.1"
+  }
+}
