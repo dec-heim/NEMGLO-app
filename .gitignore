@@ -23,3 +23,11 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# custom
+dist/
+python/
+backend/nemglo_src/__pycache__/
+cache_nemed/
+public/backend/nemglo_src/__pycache__
+backend\nemglo_src\__pycache__\
