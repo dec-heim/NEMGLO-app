@@ -3,6 +3,7 @@ import { Card } from "react-bootstrap";
 
 import AmChart from "../components/charts/MarketDataChart";
 import RevenueChart from "../components/charts/RevenueChart";
+import DownloadCSV from "../components/DownloadCSV";
 
 export default class RevenueChartView extends Component {
   constructor() {
@@ -30,6 +31,10 @@ export default class RevenueChartView extends Component {
               data={this.props.chart1}
               seriesSettings={this.props.chartSettings}
             ></RevenueChart>
+            <DownloadCSV
+              data={this.props.csv}
+              filename={this.props.csvFilename}>
+            </DownloadCSV>
           </Card.Body>
         </Card>
     );

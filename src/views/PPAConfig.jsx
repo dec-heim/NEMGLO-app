@@ -32,18 +32,18 @@ export default class PPAConfig extends Component {
       isMakingApiCall: false,
     };
     this.setIsDisabled = this.setIsDisabled.bind(this);
-    this.setCapacity = this.setCapacity.bind(this);
+    // this.setCapacity = this.setCapacity.bind(this);
   }
 
-  setCapacity(id, capacity) {
-    const { setConfigValue, ppaData } = this.props;
-    setConfigValue(id, capacity);
-    if ("cf_trace" in ppaData) {
-      if (this.props.ppaData.time.length > 0) {
-        this.storeDataPoints(this.props.ppaData);
-      }
-    }
-  }
+  // setCapacity(id, capacity) {
+  //   const { setConfigValue, ppaData } = this.props;
+  //   setConfigValue(id, capacity);
+  //   if ("cf_trace" in ppaData) {
+  //     if (this.props.ppaData.time.length > 0) {
+  //       this.storeDataPoints(this.props.ppaData);
+  //     }
+  //   }
+  // }
 
   handleSubmit = (event) => {
     console.log(this.props.isDisabled);
@@ -157,7 +157,7 @@ export default class PPAConfig extends Component {
     } = this.props;
     let filteredOptions = availableGens.filter((item) => item !== otherPPADuid);
     const { formValidated } = this.state;
-    const { setCapacity } = this.props;
+    const { setConfigUpdateChart, setStateVariable, ppaFloorPriceEnabled, ppaFloorPriceId} = this.props;
     return (
       <Card>
         <Card.Title style={{ paddingLeft: 15, paddingTop: 15 }}>
@@ -166,7 +166,7 @@ export default class PPAConfig extends Component {
                 className="mb-2 float-end"
                 id={duidId}
                 type="checkbox"
-                variant={!isDisabled ? "outline-primary" : "secondary"}
+                variant={!isDisabled ? "primary" : "secondary"}
                 checked={!isDisabled}
                 value="1"
                 onChange={(e) => this.setIsDisabled(e.currentTarget.checked)}
@@ -194,7 +194,7 @@ export default class PPAConfig extends Component {
                 id={capacityId}
                 label="Capacity (MW)"
                 description="The desired scaled nominal capacity of the unit trace selected."
-                setConfigValue={setCapacity}
+                setConfigValue={setConfigUpdateChart}
                 value={ppaCapacity}
                 disabled={isDisabled}
                 max={3 * electrolyserCapacity}
@@ -203,7 +203,7 @@ export default class PPAConfig extends Component {
                 id={strikePriceId}
                 label="PPA Strike ($/MWh)"
                 description="The Power Purchase Agreement strike price at which the variable volume contract for difference is settled."
-                setConfigValue={setConfigValue}
+                setConfigValue={setConfigUpdateChart}
                 value={ppaStrikePrice}
                 disabled={isDisabled}
                 max={3 * electrolyserCapacity}
@@ -211,13 +211,16 @@ export default class PPAConfig extends Component {
               <SliderInputOptional // Floor price input needs to be configurable as optional field, if unchecked (disabled) api call should be None.
               // Probably could do without the slider for floor input, just have the numerical field input?
                 id={floorPriceId}
+                selectedId={ppaFloorPriceId}
                 label="Floor Price ($/MWh)"
-                setConfigValue={setConfigValue}
+                setConfigValue={setConfigUpdateChart}
                 value={ppaFloorPrice}
                 max={10} // Value range for floor price should be say -100 (min) to 0 (max)
                 min={-100}
                 disabled={isDisabled}
-              ></SliderInputOptional>
+                selected={ppaFloorPriceEnabled}
+                setStateVariable={setStateVariable}
+                ></SliderInputOptional>
             </Form>
           </div>
         </Card.Body>

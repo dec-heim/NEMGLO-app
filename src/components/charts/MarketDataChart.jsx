@@ -1,10 +1,10 @@
-import React, { Component } from "react";
 import * as am5 from "@amcharts/amcharts5";
-import * as am5xy from "@amcharts/amcharts5/xy";
-import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5plugins_exporting from "@amcharts/amcharts5/plugins/exporting";
-import timestamp2str from "./Utils";
+import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
+import * as am5xy from "@amcharts/amcharts5/xy";
+import React, { Component } from "react";
 
+import timestamp2str from "./Utils";
 
 class MarketDataChart extends Component {
   constructor() {
@@ -17,32 +17,24 @@ class MarketDataChart extends Component {
   createAxisAndSeries = (
     chart,
     xAxis,
+    yAxis,
     data,
     valueYField,
     root,
-    opposite,
-    tooltip
+    tooltip,
+    lineColor,
+    lineColorText,
+    yRenderer
   ) => {
-
-    let exporting = am5plugins_exporting.Exporting.new(root, {
-      menu: am5plugins_exporting.ExportingMenu.new(root, {}),
-      dataSource: data
-    });
-
-
-    let yRenderer = am5xy.AxisRendererY.new(root, {
-      opposite: opposite,
-    });
-    let yAxis = chart.yAxes.push(
-      am5xy.ValueAxis.new(root, {
-        maxDeviation: 1,
-        renderer: yRenderer,
-      })
-    );
-
     if (chart.yAxes.indexOf(yAxis) > 0) {
       yAxis.set("syncWithAxis", chart.yAxes.getIndex(0));
     }
+
+    // let exporting = am5plugins_exporting.Exporting.new(root, {
+    //   menu: am5plugins_exporting.ExportingMenu.new(root, {}),
+    //   dataSource: data
+    // });
+
 
     // Add series
     // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
@@ -53,20 +45,32 @@ class MarketDataChart extends Component {
         yAxis: yAxis,
         valueYField: valueYField,
         valueXField: "timestamp",
-        tooltip: am5.Tooltip.new(root, {
-          pointerOrientation: "horizontal",
-          labelText: tooltip,
-        }),
+        stroke: lineColor,
       })
     );
+
+    // Customise tooltip
+    let tooltiper = am5.Tooltip.new(root, {
+      getFillFromSprite: false,
+      autoTextColor: false,
+      pointerOrientation: "horizontal",
+      labelText: tooltip,
+    });
+    tooltiper.get("background").setAll({
+      fill: lineColor,
+    })
+    tooltiper.label.setAll({
+      fill: lineColorText,
+    })
+    series.set("tooltip", tooltiper);
 
     //series.fills.template.setAll({ fillOpacity: 0.2, visible: true });
     series.strokes.template.setAll({ strokeWidth: 1 });
 
     yRenderer.grid.template.set("strokeOpacity", 0.05);
-    yRenderer.labels.template.set("fill", series.get("fill"));
+    yRenderer.labels.template.set("fill", lineColor);
     yRenderer.setAll({
-      stroke: series.get("fill"),
+      stroke: lineColor,
       strokeOpacity: 1,
       opacity: 1,
     });
@@ -108,7 +112,14 @@ class MarketDataChart extends Component {
     );
 
     let easing = am5.ease.linear;
-    chart.get("colors").set("step", 3);
+    // chart.get("colors").set("step", 3);
+    // chart.get("colors").set("colors", [
+    //   am5.color(0xB23A48), //red
+    //   am5.color(0x2A324B), // black-dark-navy
+    //   am5.color(0x5aaa95),
+    //   am5.color(0x86a873),
+    //   am5.color(0xbb9f06)
+    // ]);
     const {baseInterval} = this.props;
     // Create axis
     let xAxis = chart.xAxes.push(
@@ -144,18 +155,83 @@ class MarketDataChart extends Component {
     let data = this.props.data; // valueYField, tooltip
     const {seriesSettings} = this.props;
 
+    let priceRenderer = am5xy.AxisRendererY.new(root, {
+      opposite: false,
+    });
+    let yAxisPrice = chart.yAxes.push(
+      am5xy.ValueAxis.new(root, {
+        maxDeviation: 1,
+        renderer: priceRenderer,
+      })
+    );
+    // Add yaxis label
+    yAxisPrice.children.unshift(
+      am5.Label.new(root, {
+        rotation: -90,
+        text: "[#B23A48]Price ($/MWh)[/]",
+        y: am5.p50,
+        centerX: am5.p50
+      })
+    );
 
+    let emissionsRenderer = am5xy.AxisRendererY.new(root, {
+      opposite: true,
+    });
+    let yAxisEmissions = chart.yAxes.push(
+      am5xy.ValueAxis.new(root, {
+        maxDeviation: 1,
+        renderer: emissionsRenderer,
+      })
+    );
+    // Add secondary axis label if series is on y2
+    for (let i = 0; i < seriesSettings.length; i++) {
+      if (seriesSettings[i].valueYField === "Emissions Intensity") {
+        yAxisEmissions.children.push(
+          am5.Label.new(root, {
+            rotation: -90,
+            text: "[#2A324B]Grid Emissions Intensity (tCO2-e/MWh)[/]",
+            y: am5.p50,
+            centerX: am5.p50
+          })
+        );
+      }
+    }
+
+
+    // Color Styling
+    const nemgloStyle = getComputedStyle(document.body);
+    let myColors = { 
+      "Price": nemgloStyle.getPropertyValue('--nemglo-price'),
+      "Emissions Intensity": nemgloStyle.getPropertyValue('--nemglo-gridem'),
+    }
+    const myColorsText = {
+      "Price": nemgloStyle.getPropertyValue('--light'),
+      "Emissions Intensity": nemgloStyle.getPropertyValue('--light'),
+    }
+
+    // Update series on chart
     for (let i = 0; i < seriesSettings.length; i++) {
       let seriesSetting = seriesSettings[i];
-      let opposite = i % 2 === 0 ? false : true;
-      this.createAxisAndSeries( chart,
+      let yAxis =
+        seriesSetting.valueYField === "Price" ? yAxisPrice : yAxisEmissions;
+      let yRenderer =
+        seriesSetting.valueYField === "Price"
+          ? priceRenderer
+          : emissionsRenderer;
+      let lineColor = myColors[seriesSetting.valueYField];
+      let lineColorText = myColorsText[seriesSetting.valueYField];
+      this.createAxisAndSeries(
+        chart,
         xAxis,
+        yAxis,
         data,
         seriesSetting.valueYField,
         root,
-        opposite,
         seriesSetting.tooltip,
-        seriesSetting.enableYAxis)
+        lineColor,
+        lineColorText,
+        yRenderer
+      );
     }
 
     let legend = chart.children.push(

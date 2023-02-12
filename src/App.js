@@ -4,10 +4,11 @@ import { ProSidebarProvider } from "react-pro-sidebar";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 
 import Linux from "./media/linux.png";
-import NemgloLogo from "./media/nemgloLogo.png";
+import NemgloLogo from "./media/nemgloLogo_long_bgdark.png";
 import About from "./views/About";
 import LandingPage from "./views/LandingPage";
 import SimulationDashboard from "./views/SimulationDashboard";
+import GetStarted from "./views/GetStarted";
 
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -15,23 +16,25 @@ import "bootstrap/dist/css/bootstrap.min.css";
 function App() {
   return (
     <ProSidebarProvider className="pro-sidebar">
-      <Navbar bg="dark" variant="dark" expand="lg">
+      <Navbar bg="dark" variant="dark" expand="lg" className="navheader">
         <Container>
-          <Navbar.Brand >
-            {/* <img
-              src={Linux}
-              width="30"
-              height="30"
+          <Navbar.Brand>
+            <img
+              src={NemgloLogo}
+              width="100"
+              height="25"
+              style={{ paddingTop: "2px"}}
               className="d-inline-block align-top"
               alt="nemglo logo"
-            /> */}
-            NEMGLO
+            />
+            {/* NEMGLO */}
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
               <Nav.Link href="/">Home</Nav.Link>
-              <Nav.Link href="/simulator">Simulator</Nav.Link>
+              <Nav.Link href="/start">Get Started</Nav.Link>
+              {/* <Nav.Link href="/simulator">Simulator</Nav.Link> */}
               <Nav.Link href="/about">About</Nav.Link>
             </Nav>
           </Navbar.Collapse>
@@ -41,6 +44,7 @@ function App() {
         <div>
           <Routes>
             <Route exact path="/" element={<LandingPage />} />
+            <Route exact path="/start" element={<GetStarted />} />
             <Route exact path="simulator" element={<SimulationDashboard />} />
             <Route exact path="/about" element={<About />} />
           </Routes>

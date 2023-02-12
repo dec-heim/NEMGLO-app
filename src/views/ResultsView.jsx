@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Card } from "react-bootstrap";
 
 import PriceDispatchChart from "../components/charts/PriceDispachChart";
+import DownloadCSV from "../components/DownloadCSV";
 
 export default class ResultsView extends Component {
   constructor() {
@@ -26,7 +27,12 @@ export default class ResultsView extends Component {
             <PriceDispatchChart
               data={this.props.chart1}
               seriesSettings={this.props.chartSettings}
+              
             ></PriceDispatchChart>
+            <DownloadCSV
+              data={this.props.csv}
+              filename={this.props.csvFilename}>
+            </DownloadCSV>
           </Card.Body>
         </Card>
     );

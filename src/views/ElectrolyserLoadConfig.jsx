@@ -12,14 +12,14 @@ const CUSTOM_TYPE = "CUSTOM";
 const SEC_PROFILES = ["fixed", "variable"];
 const TECHNOLOGY_TYPES = [PEM_TYPE, AE_TYPE, CUSTOM_TYPE];
 const PEM_PROFILE = {
-  nominalSec: 10,
-  conversionFactor: 10,
-  minStableLoadFactor: 0.2
+  nominalSec: 66,
+  conversionFactor: 100,
+  minStableLoadFactor: 20
 };
 const AE_PROFILE = {
   nominalSec: 50,
   conversionFactor: 100,
-  minStableLoadFactor: 0.4
+  minStableLoadFactor: 40
 };
 const NOMINAL_SEC_PLACEHOLDER = 50;
 const CONVERSION_PLACEHOLDER = 100;
@@ -46,13 +46,13 @@ export default function ElectrolyserLoadConfig({
         setCustomTechType(false);
         setConfigValue("nominalSec", PEM_PROFILE.nominalSec);
         setConfigValue("conversionFactor", PEM_PROFILE.conversionFactor);
-        setConfigValue("minStableLoad", PEM_PROFILE.minStableLoadFactor * electrolyserCapacity);
+        setConfigValue("minStableLoad", PEM_PROFILE.minStableLoadFactor);
         break;
       case AE_TYPE:
         setCustomTechType(false);
         setConfigValue("nominalSec", AE_PROFILE.nominalSec);
         setConfigValue("conversionFactor", AE_PROFILE.conversionFactor);
-        setConfigValue("minStableLoad", AE_PROFILE.minStableLoadFactor * electrolyserCapacity);
+        setConfigValue("minStableLoad", AE_PROFILE.minStableLoadFactor);
         break;
       case CUSTOM_TYPE:
         setCustomTechType(true);
@@ -113,11 +113,12 @@ export default function ElectrolyserLoadConfig({
             ></RegularInput>
             <SliderInput
               id="minStableLoad"
-              label="Minimum Stable Load"
-              description="The lowest possible operating point of the load in MW."
+              label="Minimum Stable Load (%)"
+              description="The lowest stable operating level of the load as a percentage of the capacity."
               setConfigValue={setConfigValue}
               value={minStableLoad}
-              max={isCustomTechType ? 0.7 * electrolyserCapacity : minStableLoad }
+              max={60}
+              // max={isCustomTechType ? 0.7 * electrolyserCapacity : minStableLoad }
               disabled={!isCustomTechType}
             ></SliderInput>
            
@@ -142,12 +143,13 @@ export default function ElectrolyserLoadConfig({
              <DropDownSelector
               id="secProfile"
               label="SEC Profile"
-              description="The assumed profile of the SEC input. Refer to use guide for 'variable SEC'. If 'variable' the assumed SEC changes dependent on the load operating point."
+              description="This feature is not yet available. Check back later for future update."
+              //"The assumed profile of the SEC input. Refer to use guide for 'variable SEC'. If 'variable' the assumed SEC changes dependent on the load operating point."
               options={SEC_PROFILES}
               setConfigValue={setConfigValue}
               value={secProfile
               }
-              disabled={false}
+              disabled={true}
             ></DropDownSelector>
           </Col>
         </Row>

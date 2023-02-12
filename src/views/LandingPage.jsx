@@ -8,23 +8,27 @@ import dgfilogo from '../media/DGFILogo.gif'
 import ceemlogo from '../media/UNSWCEEMLogoTransparent.png'
 import unswlogo from '../media/unswlogo.jpg'
 import unsw from "../media/unswLogo.png";
+import Snapshot1 from "../media/NEMGLO_snapshot_operation.png";
 
 function LandingPage() {
   return (
     <div className="LandingPage"  >
-      <header></header>
-      <main>
+      <main style={{ flex: 1}}>
       <Container>
       <Row className="px-1 my-5">
         <Col sm={6}>
-          <Image src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.incimages.com%2Fuploaded_files%2Fimage%2F1920x1080%2Fgetty_586163548_334517.jpg&f=1&nofb=1&ipt=36b3132ee4337311bb90675be76bdb2c638f80245a8f3127060cee8eb5b631f0&ipo=images" fluid rounded className=""/>
+          <Image 
+            src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.incimages.com%2Fuploaded_files%2Fimage%2F1920x1080%2Fgetty_586163548_334517.jpg&f=1&nofb=1&ipt=36b3132ee4337311bb90675be76bdb2c638f80245a8f3127060cee8eb5b631f0&ipo=images"
+            fluid rounded
+            className=""
+            width="90%"/>
         </Col>
         <Col sm={6}>
           <h1 class="font-weigh-line">National Electricity Market <br></br>Green-Energy Load Optimisation</h1>
           <p class="mt-4">NEMGLO, the Australian NEM Green-energy Load Optimisation tool is a mixed-integer linear program (MILP) which allows users to solve counterfactual operating strategies for a hypothetical flexible load participating in the energy spot market.
-          Case studies can be constructed using this tool which provides the ability to study techno-economic-environmental considerations of a flexible load such as a hydrogen electrolyser or large C&I consumer, in historic NEM market conditions.<br></br>
-          Curious and Interested? Check out the lite online simulator or for extended functionality see the python package!</p>
-          <Button variant="outline-primary" href="/simulator">Go to Simulator</Button>
+          Case studies can be constructed using this tool which provides the ability to study techno-economic-environmental considerations of a flexible load such as a Hydrogen Electrolyser.<br /><br />
+          Curious and Interested? Try out NEMGLO now!</p>
+          <Button variant="outline-primary" href="/start">Get Started</Button>
         </Col>
       </Row>
       <Row>
@@ -33,8 +37,8 @@ function LandingPage() {
         <Card style={{width: "18rem"}}>
           <Card.Img variant="top" src="https://images.unsplash.com/photo-1490775949603-0e355e8e01ba?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1466&q=80"></Card.Img>
           <Card.Body>
-            <Card.Title>Getting Started</Card.Title>
-            <Card.Text>A quick start guide, tutorial page and walkthrough of the NEMGLO online Simulator.</Card.Text>
+            <Card.Title>User Guide</Card.Title>
+            <Card.Text>A user guide / tutorial page / walkthrough of the NEMGLO App is coming soon.</Card.Text>
             <Button variant="secondary" disabled={true}>Coming Soon</Button>
           </Card.Body>
         </Card>
@@ -91,18 +95,11 @@ function LandingPage() {
             </Container>
           </Card.Body>
         </Card>
+        <span style={{height: "60px"}}><br /></span>
       </Row>
     </Container>
       </main>
       <Footer></Footer>
-      {/* <footer class="py-5 my-5 bg-dark" justify="center">
-        <Container className="px-4" justify="center">
-          <p class="text-center text-white">Copyright &copy; Declan Heim and Jay Anand, 2022</p>
-          <div class="text-center">
-            <a href="/about">Licence and Disclaimer</a>
-          </div>
-        </Container>
-      </footer> */}
     </div>
   );
 }

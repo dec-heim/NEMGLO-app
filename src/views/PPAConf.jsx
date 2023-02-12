@@ -1,14 +1,12 @@
+import { max } from "moment";
 import React, { Component } from "react";
-import { Alert, Button, Card, Col, Container, Row } from "react-bootstrap";
+import { Alert, Button, ButtonGroup, Card, Col, Container, Row, ToggleButton } from "react-bootstrap";
 import Form from "react-bootstrap/Form";
 import { Audio } from "react-loader-spinner";
 
 import NemGloApi from "../api/NemgloApi";
-
-import MarketDataChart from "../components/charts/MarketDataChart";
-import DropDownSelector from "../components/DropDownSelector";
 import NewPPAChart from "../components/charts/NewPPAChart";
-import SliderInput from "../components/SliderInput";
+import DownloadCSV from "../components/DownloadCSV";
 import PPAConfig from "./PPAConfig";
 
 export default class PPAConf extends Component {
@@ -22,13 +20,20 @@ export default class PPAConf extends Component {
       region: "",
       dispatchIntervalLength: 0,
       dataPoints: [],
+      csvData: [],
       isMakingApiCall: false,
       duid1ApiCall: "",
       duid2ApiCall: "",
+      showDispatchChart: true,
     };
     this.isDisabled = this.isDisabled.bind(this);
-    this.setCapacity = this.setCapacity.bind(this);
+    this.setConfigUpdateChart = this.setConfigUpdateChart.bind(this);
     this.setPPADisabled = this.setPPADisabled.bind(this);
+  }
+
+  showDispatchChart(isShow) {
+    console.log(isShow);
+    this.setState({ showDispatchChart: isShow });
   }
 
   setPPADisabled(PPANum, isDisabled) {
@@ -63,26 +68,23 @@ export default class PPAConf extends Component {
     );
   }
 
-  setCapacity(id, capacity) {
+  setConfigUpdateChart(id, capacity) {
+    console.log(this.props)
     const { setConfigValue, config, ppa1Disabled, ppa2Disabled } = this.props;
     setConfigValue(id, capacity);
-    console.log(id, capacity);
     if (
       config.ppa1Data.time !== undefined ||
       config.ppa2Data.time !== undefined
     ) {
-      if (config.ppa1Data.time.length > 0) {
-        let ppa1Capacity = id.includes("ppa1") ? capacity : config.ppa1Capacity;
-        let ppa2Capacity = id.includes("ppa2") ? capacity : config.ppa2Capacity;
-        this.storeDataPoints(
-          config.ppa1Data,
-          config.ppa2Data,
-          ppa1Capacity,
-          ppa2Capacity,
-          ppa1Disabled,
-          ppa2Disabled
-        );
-      }
+
+      this.storeDataPoints(
+        config.ppa1Data,
+        config.ppa2Data,
+        config.ppa1Capacity,
+        config.ppa2Capacity,
+        ppa1Disabled,
+        ppa2Disabled
+      );
     }
   }
 
@@ -118,7 +120,7 @@ export default class PPAConf extends Component {
       duid: config.duid1 === "" ? marketData.availgens[0] : config.duid1,
       ppaCapacity: config.ppa1Capacity,
       ppaStrikePrice: config.ppa1StrikePrice,
-      ppaFloorPrice: config.ppa1FloorPrice
+      ppaFloorPrice: config.ppa1FloorPrice,
     };
     const duid2Body = {
       startDate: startDate,
@@ -127,8 +129,8 @@ export default class PPAConf extends Component {
       dispatchIntervalLength: dispatchIntervalLength,
       duid: config.duid2 === "" ? marketData.availgens[1] : config.duid2,
       ppaCapacity: config.ppa2Capacity,
-      ppaStrikePrice: config.ppa1StrikePrice,
-      ppaFloorPrice: config.ppa1FloorPrice
+      ppaStrikePrice: config.ppa2StrikePrice,
+      ppaFloorPrice: config.ppa2FloorPrice,
     };
 
     this.setState({
@@ -161,12 +163,8 @@ export default class PPAConf extends Component {
       ppa1Disabled,
       ppa2Disabled
     );
-    if (ppa1Disabled) {
-      setPPAData(ppaData1, "duid1");
-    }
-    if (ppa2Disabled) {
-      setPPAData(ppaData2, "duid2");
-    }
+    setPPAData(ppaData1, "duid1");
+    setPPAData(ppaData2, "duid2");
     this.setState({ isMakingApiCall: false });
   };
 
@@ -190,18 +188,28 @@ export default class PPAConf extends Component {
       config.ppa1Data.time !== undefined ||
       config.ppa2Data.time !== undefined
     ) {
-      if (config.ppa1Data.time.length > 0) {
-        this.storeDataPoints(
-          config.ppa1Data,
-          config.ppa2Data,
-          config.ppa1Capacity,
-          config.ppa2Capacity,
-          ppa1Disabled,
-          ppa2Disabled
-        );
-      }
+      this.storeDataPoints(
+        config.ppa1Data,
+        config.ppa2Data,
+        config.ppa1Capacity,
+        config.ppa2Capacity,
+        ppa1Disabled,
+        ppa2Disabled
+      );
     }
   }
+
+  calculateCost = (capacity, floorPrice, strikePrice, marketPrice, floorPriceEnabled) => {
+    const { dispatchIntervalLength } = this.props;
+    if (floorPriceEnabled) {
+      return (
+        (strikePrice - Math.max(floorPrice, marketPrice)) *
+        (dispatchIntervalLength / 60) * capacity
+      );
+    } else {
+      return (strikePrice - marketPrice) * (dispatchIntervalLength / 60) * capacity;
+    }
+  };
 
   storeDataPoints = (
     ppaData1,
@@ -211,31 +219,104 @@ export default class PPAConf extends Component {
     ppa1Disabled,
     ppa2Disabled
   ) => {
-    console.log(ppa1Disabled, ppa2Disabled);
+    if (ppa1Disabled && ppa2Disabled) {
+      return;
+    }
+
+    const { config, ppa1FloorPriceEnabled, ppa2FloorPriceEnabled, marketData } =
+      this.props;
     let dataPoints = [];
-    if (!ppa1Disabled) {
+    let csvData = [];
+
+    if (!ppa1Disabled && "time" in ppaData1) {
       for (let i = 0; i < ppaData1.time.length; i++) {
         let dataPoint = {};
+        let csvRow = {};
         dataPoint["timestamp"] = ppaData1.timestamps[i];
-        if (!ppa1Disabled)
-          dataPoint["ppa1"] = ppa1Capacity * ppaData1.cf_trace[i];
-        if (!ppa2Disabled)
-          dataPoint["ppa2"] = ppa2Capacity * ppaData2.cf_trace[i];
+        csvRow["Time"] = ppaData1.time[i];
+        // csvRow["Electrolyser Nominal Load"] = config.electrolyserCapacity; // No need to have this in CSV
+        dataPoint["Electrolyser Nominal Load"] = config.electrolyserCapacity;
+        if (!ppa1Disabled) {
+          dataPoint["PPA 1"] = ppa1Capacity * ppaData1.cf_trace[i];
+          csvRow["PPA 1"] = ppa1Capacity * ppaData1.cf_trace[i];
+          dataPoint["PPA 1 Cost"] = this.calculateCost(
+            config.ppa1Capacity,
+            config.ppa1FloorPrice,
+            config.ppa1StrikePrice,
+            marketData.prices[i],
+            ppa1FloorPriceEnabled
+          );
+          csvRow["PPA 1 Cost"] = this.calculateCost(
+            config.ppa1Capacity,
+            config.ppa1FloorPrice,
+            config.ppa1StrikePrice,
+            marketData.prices[i],
+            ppa1FloorPriceEnabled
+          );
+        }
+        if (!ppa2Disabled) {
+          dataPoint["PPA 2"] = ppa2Capacity * ppaData2.cf_trace[i];
+          csvRow["PPA 2"] = ppa2Capacity * ppaData2.cf_trace[i];
+          dataPoint["PPA 2 Cost"] = this.calculateCost(
+            config.ppa2Capacity,
+            config.ppa2FloorPrice,
+            config.ppa2StrikePrice,
+            marketData.prices[i],
+            ppa2FloorPriceEnabled
+          );
+          csvRow["PPA 2 Cost"] = this.calculateCost(
+            config.ppa2Capacity,
+            config.ppa2FloorPrice,
+            config.ppa2StrikePrice,
+            marketData.prices[i],
+            ppa2FloorPriceEnabled
+          );
+        }
+        if ("PPA 1" in dataPoint && "PPA 2" in dataPoint) {
+          dataPoint["Combined Trace"] = dataPoint["PPA 1"] + dataPoint["PPA 2"];
+          csvRow["Combined Trace"] = dataPoint["PPA 1"] + dataPoint["PPA 2"];
+          dataPoint["Combined Cost"] =
+            dataPoint["PPA 1 Cost"] + dataPoint["PPA 2 Cost"];
+          csvRow["Combined Cost"] =
+            dataPoint["PPA 1 Cost"] + dataPoint["PPA 2 Cost"];
+        }
         dataPoints.push(dataPoint);
+        csvData.push(csvRow);
       }
-    } else {
+    } else if ("time" in ppaData2) {
       for (let i = 0; i < ppaData2.time.length; i++) {
         let dataPoint = {};
+        let csvRow = {};
         dataPoint["timestamp"] = ppaData2.timestamps[i];
-        if (!ppa1Disabled)
-          dataPoint["ppa1"] = ppa1Capacity * ppaData1.cf_trace[i];
-        if (!ppa2Disabled)
-          dataPoint["ppa2"] = ppa2Capacity * ppaData2.cf_trace[i];
+        csvRow["Time"] = ppaData2.time[i];
+        csvRow["Electrolyser Nominal Load"] = config.electrolyserCapacity;
+        dataPoint["Electrolyser Nominal Load"] = config.electrolyserCapacity;
+        if (!ppa1Disabled) {
+          dataPoint["PPA 1"] = ppa1Capacity * ppaData1.cf_trace[i];
+          csvRow["PPA 1"] = ppa1Capacity * ppaData1.cf_trace[i];
+          dataPoint["PPA 1 Cost"] = ppaData1.cost_trace[i];
+          csvRow["PPA 1 Cost"] = ppaData1.cost_trace[i];
+        }
+        if (!ppa2Disabled) {
+          dataPoint["PPA 2"] = ppa2Capacity * ppaData2.cf_trace[i];
+          csvRow["PPA 2"] = ppa2Capacity * ppaData2.cf_trace[i];
+          dataPoint["PPA 2 Cost"] = ppaData2.cost_trace[i];
+          csvRow["PPA 2 Cost"] = ppaData2.cost_trace[i];
+        }
+        if ("PPA 1" in dataPoint && "PPA 2" in dataPoint) {
+          dataPoint["Combined Trace"] = dataPoint["PPA 1"] + dataPoint["PPA 2"];
+          csvRow["Combined Trace"] = dataPoint["PPA 1"] + dataPoint["PPA 2"];
+          dataPoint["Combined Cost"] =
+            dataPoint["PPA 1 Cost"] + dataPoint["PPA 2 Cost"];
+          csvRow["Combined Cost"] =
+            dataPoint["PPA 1 Cost"] + dataPoint["PPA 2 Cost"];
+        }
+        // console.log(dataPoints);
         dataPoints.push(dataPoint);
+        csvData.push(csvRow);
       }
     }
-    console.log(dataPoints);
-    this.setState({ dataPoints });
+    this.setState({ dataPoints, csvData });
   };
 
   isDisabled = () => {
@@ -243,22 +324,6 @@ export default class PPAConf extends Component {
   };
 
   render() {
-    const baseInterval = {
-      timeUnit: "minute",
-      count: 5,
-    };
-    const seriesSettings = [
-      {
-        valueYField: "ppa1",
-        tooltip: "MW: {valueY}",
-        enableYAxis: true,
-      },
-      {
-        valueYField: "ppa2",
-        tooltip: "MW: {valueY}",
-        enableYAxis: true,
-      },
-    ];
     let {
       setConfigValue,
       config,
@@ -267,27 +332,81 @@ export default class PPAConf extends Component {
       ppa2Disabled,
       setPPADisabled,
       setPPAData,
+      ppa1FloorPriceEnabled,
+      ppa2FloorPriceEnabled,
+      setStateVariable
     } = this.props;
     let {
       formValidated,
       dataPoints,
+      csvData,
       isMakingApiCall,
       duid1ApiCall,
       duid2ApiCall,
+      showDispatchChart,
     } = this.state;
+    const baseInterval = {
+      timeUnit: "minute",
+      count: 5,
+    };
+    let dispatchSeriesSettings = [];
+    let costSeriesSettings = [];
+    if (!ppa1Disabled) {
+      dispatchSeriesSettings.push({
+        valueYField: "PPA 1",
+        tooltip: "#1: {valueY.formatNumber('#.0')} MW",
+        enableYAxis: true,
+      });
+      costSeriesSettings.push({
+        valueYField: "PPA 1 Cost",
+        tooltip: "#1: {valueY.formatNumber('#.00')} $/MWh",
+        enableYAxis: true,
+      });
+    }
+
+    if (!ppa2Disabled) {
+      dispatchSeriesSettings.push({
+        valueYField: "PPA 2",
+        tooltip: "#2: {valueY.formatNumber('#.0')} MW",
+        enableYAxis: true,
+      });
+      costSeriesSettings.push({
+        valueYField: "PPA 2 Cost",
+        tooltip: "#2: {valueY.formatNumber('#.00')} $/MWh",
+        enableYAxis: true,
+      });
+    }
+    if (!ppa1Disabled && !ppa2Disabled) {
+      dispatchSeriesSettings.push({
+        valueYField: "Combined Trace",
+        tooltip: "NET: {valueY.formatNumber('#.0')} MW",
+        enableYAxis: true,
+      });
+      costSeriesSettings.push({
+        valueYField: "Combined Cost",
+        tooltip: "NET: {valueY.formatNumber('#.00')} $/MWh",
+        enableYAxis: true,
+      });
+    }
+    dispatchSeriesSettings.push({
+      valueYField: "Electrolyser Nominal Load",
+      tooltip: "Nominal Load",
+      enableYAxis: true,
+    });
 
     let showAlert =
-      (duid1ApiCall !== "" &&
-      duid1ApiCall !== config.duid1) ||
-      (duid2ApiCall !== "" &&
-      duid2ApiCall !== config.duid2);
-
+      (duid1ApiCall !== "" && duid1ApiCall !== config.duid1) ||
+      (duid2ApiCall !== "" && duid2ApiCall !== config.duid2);
+    let showDownloadCsv = csvData.length !== 0;
+    let seriesSettings = showDispatchChart
+      ? dispatchSeriesSettings
+      : costSeriesSettings;
     return (
       <div>
         {showAlert && (
           <Alert key="info" variant="info">
-            You updated the PPA Configuration, select Get Renewables Data to get new
-            results.
+            You updated the PPA Configuration, select Get Renewables Data to get
+            new results.
           </Alert>
         )}
 
@@ -299,8 +418,18 @@ export default class PPAConf extends Component {
             paddingBottom: 5,
           }}
         >
-          <Card.Title style={{ paddingLeft: 15 }}>
-            Power Purchase Agreements
+          <Card.Title style={{ paddingLeft: 15, paddingRight: 15 }}>
+            Renewable Power Purchase Agreements
+            {dataPoints.length > 0 && (
+            <ButtonGroup className="mb-2 float-end">
+              <Button onClick={() => this.showDispatchChart(true)} variant={showDispatchChart ? "primary": "outline-primary"} active={showDispatchChart ? true : false}>
+                Dispatch
+              </Button>
+              <Button onClick={() => this.showDispatchChart(false)} variant={showDispatchChart ? "outline-primary" : "primary"} active={showDispatchChart ? false : true}>
+                Cost
+              </Button>
+            </ButtonGroup>
+            )}
           </Card.Title>
           <Card.Body>
             {!isMakingApiCall ? (
@@ -309,6 +438,7 @@ export default class PPAConf extends Component {
                   <NewPPAChart
                     id={"ppa-plot"}
                     data={dataPoints}
+                    isDispatchChart={showDispatchChart}
                     seriesSettings={seriesSettings}
                     baseInterval={{
                       timeUnit: "minute",
@@ -336,7 +466,7 @@ export default class PPAConf extends Component {
                           strikePriceId="ppa1StrikePrice"
                           floorPriceId="ppa1FloorPrice"
                           setConfigValue={setConfigValue}
-                          setCapacity={this.setCapacity}
+                          setConfigUpdateChart={this.setConfigUpdateChart}
                           duid={
                             config.duid1 === ""
                               ? marketData.availgens[0]
@@ -357,6 +487,9 @@ export default class PPAConf extends Component {
                           ppaData={config.ppa1Data}
                           setPPAData={setPPAData}
                           electrolyserCapacity={config.electrolyserCapacity}
+                          ppaFloorPriceEnabled={ppa1FloorPriceEnabled}
+                          ppaFloorPriceId="ppa1FloorPriceEnabled"
+                          setStateVariable={setStateVariable}
                         />
                       </Col>
                       <Col>
@@ -368,7 +501,7 @@ export default class PPAConf extends Component {
                           strikePriceId="ppa2StrikePrice"
                           floorPriceId="ppa2FloorPrice"
                           setConfigValue={setConfigValue}
-                          setCapacity={this.setCapacity}
+                          setConfigUpdateChart={this.setConfigUpdateChart}
                           duid={
                             config.duid2 === ""
                               ? marketData.availgens[1]
@@ -389,10 +522,19 @@ export default class PPAConf extends Component {
                           ppaData={config.ppa2Data}
                           setPPAData={setPPAData}
                           electrolyserCapacity={config.electrolyserCapacity}
+                          ppaFloorPriceEnabled={ppa2FloorPriceEnabled}
+                          ppaFloorPriceId="ppa2FloorPriceEnabled"
+                          setStateVariable={setStateVariable}
                         />
                       </Col>
                     </Row>
                     <Container style={{ height: 10 }}></Container>
+                    {showDownloadCsv && (
+                      <DownloadCSV
+                        data={csvData}
+                        filename="nemglo-ppa-data"
+                      ></DownloadCSV>
+                    )}
                     {ppa1Disabled && ppa2Disabled ? (
                       <Button className="float-end" variant={"secondary"}>
                         Get Renewables Data

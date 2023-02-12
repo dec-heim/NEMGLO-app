@@ -35,6 +35,8 @@ export default function SliderInput(props) {
           onChange={(e) => updateValue(e)}
         />
         <RangeSlider
+          className="custom-range"
+          variant="primary"
           disabled={props.disabled}
           max={props.max}
           step={props.step ? props.step : 1}

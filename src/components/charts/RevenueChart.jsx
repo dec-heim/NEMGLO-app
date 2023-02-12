@@ -1,8 +1,8 @@
-import React, { Component } from "react";
 import * as am5 from "@amcharts/amcharts5";
-import * as am5xy from "@amcharts/amcharts5/xy";
-import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5plugins_exporting from "@amcharts/amcharts5/plugins/exporting";
+import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
+import * as am5xy from "@amcharts/amcharts5/xy";
+import React, { Component } from "react";
 
 class RevenueChart extends Component {
   constructor() {
@@ -20,20 +20,19 @@ class RevenueChart extends Component {
     valueYField,
     root,
     tooltip,
+    lineColor,
+    lineColorText,
     yRenderer
   ) => {
-
-    // Add series
-    // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
-
-    let exporting = am5plugins_exporting.Exporting.new(root, {
-      menu: am5plugins_exporting.ExportingMenu.new(root, {}),
-      dataSource: data
-    });
-
     if (chart.yAxes.indexOf(yAxis) > 0) {
       yAxis.set("syncWithAxis", chart.yAxes.getIndex(0));
     }
+    // let exporting = am5plugins_exporting.Exporting.new(root, {
+    //   menu: am5plugins_exporting.ExportingMenu.new(root, {}),
+    //   dataSource: data
+    // });
+    // Add series
+    // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
 
     let series = chart.series.push(
       am5xy.LineSeries.new(root, {
@@ -41,20 +40,35 @@ class RevenueChart extends Component {
         yAxis: yAxis,
         valueYField: valueYField,
         valueXField: "timestamp",
-        tooltip: am5.Tooltip.new(root, {
-          pointerOrientation: "horizontal",
-          labelText: tooltip,
-        }),
+        stroke: lineColor,
       })
     );
 
-    //series.fills.template.setAll({ fillOpacity: 0.2, visible: true });
-    series.strokes.template.setAll({ strokeWidth: 1 });
+    // Customise tooltip color
+    let tooltiper = am5.Tooltip.new(root, {
+      getFillFromSprite: false,
+      autoTextColor: false,
+      labelText: tooltip,
+    });
+    tooltiper.get("background").setAll({
+      fill: lineColor,
+    })
+    tooltiper.label.setAll({
+      fill: lineColorText,
+    })
+    series.set("tooltip", tooltiper);
 
+    if (valueYField == "Total") {
+      series.strokes.template.setAll({ strokeWidth: 1.4 });
+    } else {
+      series.strokes.template.setAll({ strokeWidth: 1 });
+    }
+    //series.fills.template.setAll({ fillOpacity: 0.2, visible: true });
     yRenderer.grid.template.set("strokeOpacity", 0.05);
-    yRenderer.labels.template.set("fill", series.get("fill"));
+    const axisLineColor = getComputedStyle(document.body).getPropertyValue("--dark")
+    yRenderer.labels.template.set("fill", axisLineColor);
     yRenderer.setAll({
-      stroke: series.get("fill"),
+      stroke: axisLineColor,
       strokeOpacity: 1,
       opacity: 1,
     });
@@ -99,8 +113,26 @@ class RevenueChart extends Component {
       })
     );
 
+
+    const nemgloStyle = getComputedStyle(document.body);
+    let myColors = { 
+      "Total": nemgloStyle.getPropertyValue('--dark'),
+      "Energy": nemgloStyle.getPropertyValue('--nemglo-load'),
+      "H2": nemgloStyle.getPropertyValue('--nemglo-h2'),
+      "PPA 1": nemgloStyle.getPropertyValue('--nemglo-ppa1'),
+      "PPA 2": nemgloStyle.getPropertyValue('--nemglo-ppa2'),
+      "Market RECs": nemgloStyle.getPropertyValue('--nemglo-rec'),
+    }
+    const myColorsText = {
+      "Total": nemgloStyle.getPropertyValue('--light'),
+      "Energy": nemgloStyle.getPropertyValue('--light'),
+      "H2": nemgloStyle.getPropertyValue('--light'),
+      "PPA 1": nemgloStyle.getPropertyValue('--light'),
+      "PPA 2": nemgloStyle.getPropertyValue('--light'),
+      "Market RECs": nemgloStyle.getPropertyValue('--light'),
+    }
+
     let easing = am5.ease.linear;
-    chart.get("colors").set("step", 3);
     // Create axis
     let xAxis = chart.xAxes.push(
       am5xy.DateAxis.new(root, {
@@ -138,7 +170,7 @@ class RevenueChart extends Component {
     let data = this.props.data; // valueYField, tooltip
     const {seriesSettings} = this.props;
     let yRenderer = am5xy.AxisRendererY.new(root, {
-      opposite: true,
+      opposite: false,
     });
     let yAxis = chart.yAxes.push(
       am5xy.ValueAxis.new(root, {
@@ -146,16 +178,29 @@ class RevenueChart extends Component {
         renderer: yRenderer,
       })
     );
-
+    yAxis.children.unshift(
+      am5.Label.new(root, {
+        rotation: -90,
+        text: "Cost ($)",
+        y: am5.p50,
+        centerX: am5.p50,
+      })
+    );
     for (let i = 0; i < seriesSettings.length; i++) {
       let seriesSetting = seriesSettings[i];
+      // Match the designated color for this line series
+      let lineColor = myColors[seriesSetting.valueYField];
+      let lineColorText = myColorsText[seriesSetting.valueYField];
       this.createAxisAndSeries( chart,
         xAxis,
         yAxis,
         data,
         seriesSetting.valueYField,
         root,
-        seriesSetting.tooltip, yRenderer)
+        seriesSetting.tooltip,
+        lineColor,
+        lineColorText,
+        yRenderer)
     }
 
 

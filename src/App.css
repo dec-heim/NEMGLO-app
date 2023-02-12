@@ -8,6 +8,25 @@ input[type=number]::-webkit-outer-spin-button {
 
 :root {
     --color_sidebar: #2e3440;
+/* NEMGLO logo */
+    --ng-orange: #bc6c25;
+    --ng-green: #588157;
+
+/* Basics */
+    --light: #f2f2f2;
+    --dark: #474747;
+
+/* NEMGLO chart series */
+    --nemglo-price: #A93744;
+    --nemglo-load: #7A5190;
+    --nemglo-load2: #2A324B;
+    --nemglo-gridem: #474747;
+    --nemglo-rec: #E07400;
+    --nemglo-ppa2: #849324;
+    --nemglo-comb: #3E8989;
+    --nemglo-ppa1: #BB9B25;
+    --nemglo-h2: #851E4E;
+
 /* NORD color scheme */
     --polar-1: #4c566a;
     --polar-2: #434c5e;
@@ -27,6 +46,39 @@ input[type=number]::-webkit-outer-spin-button {
     --aurora-r: #bf616a;
 }
 
+
+.alert-primary {
+    color: var(--dark) !important;
+    background-color: #3e7a3d44 !important;
+    border-color: #3e7a3d !important;
+}
+
+.btn-danger {
+    background-color: var(--ng-orange) !important;
+    border-color: var(--ng-orange) !important;
+}
+
+.btn-primary {
+    color: var(--light) !important;
+    background-color: #3e7a3d !important;
+    border-color: #3e7a3d !important;
+}
+.btn-primary:hover {
+    background-color: #186317 !important;
+}
+
+.btn-primary:hover {
+    background-color: #186317 !important;
+}
+.btn-outline-primary {
+    color: #3e7a3d !important;
+    background-color: #f8f8f8 !important;
+    border-color: #3e7a3d !important;
+}
+.btn-outline-primary:hover {
+    color: var(--light) !important;
+    background-color: #186317 !important;
+}
 .col_sidebar {
     background: var(--polar-4);
 }
@@ -45,6 +97,7 @@ input[type=number]::-webkit-outer-spin-button {
     color: var(--frost-4);
 }
 
+@import '~antd/dist/antd.css';
 
 .logo {
   float: left;
