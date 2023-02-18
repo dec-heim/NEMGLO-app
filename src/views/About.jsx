@@ -37,8 +37,8 @@ export default function About() {
             Case studies can be constructed using this tool with the ability to study techno-economic-environmental considerations of a flexible load
             such as a Hydrogen Electrolyser.<br /><br />
             This project was developed to provide access to a free, open-source tool that could be used to help industry & research communities to better understand key opportunities and barriers for green-energy consumption from flexible loads.
-            Namely a fitting context for such is in evaluating flexible operation of hydrogen electrolyser technology and how it may procure green-energy via grid-connection in the NEM, through contracting Power Purchase Agreements and relevant certificate schemes (such as LGCs).
-            By incorporating emissions data, results from this tool can help distill what might legitmately be classified as 'green-hydrogen' rather than green-washing.<br /><br />
+            Namely a fitting context for such is in evaluating flexible operation of hydrogen electrolyser technology and how it may procure green-energy via grid-connection in the NEM, through contracting Power Purchase Agreements and relevant certificate schemes (at present LGCs).
+            By incorporating emissions data, results from this tool may help distil what might legitimately be classified 'green-hydrogen', as emissions accounting and appropriate accreditation for green-hydrogen is a critical aspect of energy transition & global decarbonisation more broadly.<br /><br />
             <b>Key Features of NEMGLO include:</b>
             <List style={{justifyContents: "center"}}>
               <ListItem><ListItemText style={{textAlign: "center"}}> Adjustable Load Operating Characteristics (Min stable load, Hydrogen Specific Energy Consumption, etc.)</ListItemText></ListItem>

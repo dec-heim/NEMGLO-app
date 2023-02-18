@@ -141,7 +141,6 @@ export default class SimulationDashboard extends Component {
   };
 
   resetConfig = () => {
-    console.log("here");
     this.setState({
       config: {
         dispatchIntervalLength: 30,
