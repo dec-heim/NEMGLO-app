@@ -95,7 +95,7 @@ export default function About() {
             <h1 class="font-weigh-line">Citation</h1>
             <p class="mt-1">
               Please reference usage of this package with:<br />
-              <b>D. Heim, and J. Anand. (2022). NEMGLO (v0.2).</b>
+              <b>D. Heim, J. Anand, and I. MacGill. (2022). NEMGLO (v0.2).</b>
               <br /><br />
             </p>
           </Row>
@@ -115,7 +115,7 @@ export default function About() {
             >
               <h1 class="font-weigh-line">Acknowledgements</h1>
               <span>This project was developed in 2022 as a Masters Thesis Project at <a href="https://www.ceem.unsw.edu.au/" target="_blank">UNSW Collaboration on Energy and Environmental Markets</a>
-              <br /> and with financial support of the <a href="https://www.dgfi.unsw.edu.au/" target="_blank">UNSW Digital Grid Futures Institute (DGFI)</a>.<br /><br /><br /></span>
+              <br /> and with financial support of the <a href="https://www.dgfi.unsw.edu.au/" target="_blank">UNSW Digital Grid Futures Institute (DGFI)</a> from Aug-Dec 2022.<br /><br /><br /></span>
               <Col sm={4}>
                 <a href="https://www.unsw.edu.au/" target="_blank"><Image src={unsw} fluid rounded width="200"/></a>
               </Col>

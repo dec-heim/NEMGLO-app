@@ -1,4 +1,7 @@
-# NEMGLO App
-This repository contains the front-end sourcecode for the NEMGLO App. It doesn't really have any use at the moment, other than a point of reference for anyone wanting a sticky beak. If you do wish to use this code in any way, please note the licence terms.
+# Tauri + React
 
-**To actually use the NEMGLO App, refer to the project website: [https://www.nemglo.org/](https://www.nemglo.org/)**
+This template should help get you started developing with Tauri and React in Vite.
+
+## Recommended IDE Setup
+
+- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)

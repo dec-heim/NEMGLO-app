@@ -93,6 +93,27 @@ input[type=number]::-webkit-outer-spin-button {
     border-right: None;
 }
 
+.navheader{
+    min-height: 50px;
+    background-color: #212529;
+}
+  
+.footer{
+    height: 40px;
+    padding: 25px;
+    padding-top: 15px;
+    padding-bottom: 30px;
+    background-color: #212529;
+    color: #f2f2f2;
+    position: fixed;
+    z-index: 999;
+    font-size: 11px;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+}
+  
+
 .pro-sidebar {
     color: var(--frost-4);
 }

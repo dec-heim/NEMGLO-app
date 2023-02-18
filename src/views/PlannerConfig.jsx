@@ -9,6 +9,7 @@ import DownloadCSV from "../components/DownloadCSV";
 import DropDownSelector from "../components/DropDownSelector";
 import DropDownSelectorOptional from "../components/DropDownSelectorOptional";
 import HelpToolTip from "../components/HelpToolTip";
+import BackendErrorLogs from "../components/BackendErrorLogs";
 
 const regions = ["NSW1", "QLD1", "VIC1", "SA1", "TAS1"];
 
@@ -27,13 +28,14 @@ export default class PlannerConfig extends Component {
       prevStartTime: null, 
       prevEndTime: null, 
       prevEmissionsType : null, 
-      prevEmissionsEnabled: null,
+      prevEmissionsEnabled: null
     };
     this.isDateInvalid = this.isDateInvalid.bind(this);
     this.getMarketData = this.getMarketData.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.storeDataPoints = this.storeDataPoints.bind(this);
     this.getCSVData = this.getCSVData.bind(this);
+    this.setStateVariable = this.setStateVariable.bind(this);
   }
 
   componentDidMount() {
@@ -46,6 +48,11 @@ export default class PlannerConfig extends Component {
     }
   }
 
+  setStateVariable(id, enabled) {
+    this.setState({
+      [id]: enabled,
+    });
+  }
   handleSubmit = (event) => {
     const form = event.currentTarget;
     event.preventDefault();
@@ -136,11 +143,22 @@ export default class PlannerConfig extends Component {
     this.setState({ prevDispatchLength: dispatchIntervalLength, prevStartDate: startDate, 
       prevEndDate: endDate, prevStartTime: startTime, prevEndTime: endTime, prevRegion: region, prevEmissionsEnabled: emissionsTypeEnabled, prevEmissionsType: emissionsType });
     this.setState({ isMakingApiCall: true });
-    const marketData = await NemGloApi.getMarketData(config, emissionsTypeEnabled);
-    this.setState({ isMakingApiCall: false });
-    this.storeDataPoints(marketData);
-    this.props.setMarketData(marketData);
-    this.setState({ marketData });
+    const response = await NemGloApi.getMarketData(config, emissionsTypeEnabled);
+    if (response.code === "ERR_NETWORK") {
+      const connectionErrorMessage = ("Failed to establish connection to NEMGLO_API.\n\n"+
+        "The most likely cause is that you do not have NEMGLO_API running locally on your computer. "+
+        "NEMGLO_API must run concurrently with the NEMGLO app interface.\n\n"+
+        "Other reasons why this might have failed even if NEMGLO_API is running may be due to your browser blocking the NEMGLO API. "+
+        "Ensure you are running NEMGLO locally via the executable. Do not try to access the NEMGLO app via the website!\n\n"+
+        " For more information see: https://www.nemglo.org/start")
+      this.setState({ isMakingApiCall: false, formValidated: false, showErrorLogs: true, errorLogs: connectionErrorMessage})
+    } else {
+      const marketData = response.data;
+      this.setState({ isMakingApiCall: false, showErrorLogs: false });
+      this.storeDataPoints(marketData);
+      this.props.setMarketData(marketData);
+      this.setState({ marketData });
+    }
   };
 
   storeDataPoints = (marketData) => {
@@ -183,7 +201,9 @@ export default class PlannerConfig extends Component {
       prevStartTime, 
       prevEndTime, 
       prevEmissionsEnabled,
-      prevEmissionsType
+      prevEmissionsType,
+      showErrorLogs,
+      errorLogs
     } = this.state;
     const {
       startDate,
@@ -210,6 +230,11 @@ export default class PlannerConfig extends Component {
     let showDownloadCsv = ('time' in marketData) && (marketData.time.length > 0);
     return (
       <div>
+        <BackendErrorLogs
+          show={showErrorLogs}
+          errorLogs={errorLogs}
+          setStateVariable={this.setStateVariable}
+        ></BackendErrorLogs>
         {showAlert && (
           <Alert key="info" variant="info">
             You updated the Planner Configuration, select Get Market Data to

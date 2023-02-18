@@ -31,3 +31,4 @@ backend/nemglo_src/__pycache__/
 cache_nemed/
 public/backend/nemglo_src/__pycache__
 backend\nemglo_src\__pycache__\
+src-tauri/target/

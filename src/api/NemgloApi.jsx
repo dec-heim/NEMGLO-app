@@ -19,11 +19,12 @@ const getMarketData = async (marketConfig, emissionsTypeEnabled) => {
         emissions_type: marketConfig.emissions_type,
       };
     }
-    const reponse = await axios.post(`${config.api}/get-market-data`, body);
-    return reponse.data;
+    const response = await axios.post(`${config.api}/get-market-data`, body);
+    console.log(response);
+    return response;
   } catch (err) {
     console.log(err);
-    return null;
+    return err;
   }
 };
 
@@ -169,7 +170,7 @@ const runSimulation = async (
     return reponse;
   } catch (err) {
     console.log(err);
-    console.log(err.response); // I guess we should store this in variable somewhere and display on page or alert box or something.
+    console.log(err.response);
     return err.response;
   }
 };

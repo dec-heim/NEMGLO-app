@@ -38,8 +38,10 @@ function LandingPage() {
           <Card.Img variant="top" src="https://images.unsplash.com/photo-1490775949603-0e355e8e01ba?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1466&q=80"></Card.Img>
           <Card.Body>
             <Card.Title>User Guide</Card.Title>
-            <Card.Text>A user guide / tutorial page / walkthrough of the NEMGLO App is coming soon.</Card.Text>
-            <Button variant="secondary" disabled={true}>Coming Soon</Button>
+            <Card.Text>A user guide / tutorial page / walkthrough of the NEMGLO App accesible online.</Card.Text>
+            <a href="https://nemglo.readthedocs.io/en/latest/nemglo_app/appwalkthrough.html" target="_blank">
+              <Button variant="primary">Read User Guide</Button>
+            </a>
           </Card.Body>
         </Card>
         </Col>
